@@ -8,6 +8,7 @@
     "build": "npm run ts:build",
     "prod:serve": "node dist/server.js",
     "start": "npm run build && npm run prod:serve",
+    "pm2": "npm run build && pm2 start dist/server.js",
     "tslint": "tslint -c tslint.json -p tsconfig.json"
   },
   "dependencies": {
