@@ -88,10 +88,13 @@ async function translateContent(
     async (resolve, reject) => {
       try {
         const browser = await puppeteer.launch({
-          ignoreDefaultArgs: true,
+          // ignoreDefaultArgs: true,
           // headless: false,
           args: [
             "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-gpu",
+            "--disable-dev-shm-usage",
             "--disable-web-security",
             "--disable-features=IsolateOrigins,site-per-process",
           ],
