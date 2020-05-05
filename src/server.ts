@@ -37,6 +37,7 @@ app.get("/page", async (req, res) => {
 
     const { html, browser } = await translateContent(url)
 
+    res.set("Content-Type", "text/html")
     res.write(html)
     res.end()
 
@@ -121,15 +122,21 @@ async function translateContent(
           (body) => body.innerHTML,
           bodyHandle
         )
-        console.log(translatePage)
-
         const frame = page.mainFrame()
         const childFrame = frame
           .childFrames()
           .find((fr: puppeteer.Frame) => fr.name() === "c")
 
+        console.log("Url: ", childFrame?.url())
+        console.log("Autoscrolling page...")
         await autoScroll(childFrame)
-        const html: string | undefined = await childFrame?.content()
+        console.log("Finished autoscrolling")
+        const bodyTranslate: any = await childFrame?.$("body")
+        const html: string | undefined = await childFrame?.evaluate(
+          (body) => body.innerHTML,
+          bodyTranslate
+        )
+        // const html: string | undefined = await childFrame?.content()
         resolve({ html, browser })
       } catch (err) {
         console.log(err)
