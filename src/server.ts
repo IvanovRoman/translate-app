@@ -116,6 +116,13 @@ async function translateContent(
 
         console.log(`Открываю страницу: ${url}`)
 
+        const bodyHandle: any = await page.$("body")
+        const translatePage = await page.evaluate(
+          (body) => body.innerHTML,
+          bodyHandle
+        )
+        console.log(translatePage)
+
         const frame = page.mainFrame()
         const childFrame = frame
           .childFrames()
