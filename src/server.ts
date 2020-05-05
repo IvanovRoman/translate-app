@@ -91,6 +91,7 @@ async function translateContent(
           ignoreDefaultArgs: true,
           // headless: false,
           args: [
+            "--no-sandbox",
             "--disable-web-security",
             "--disable-features=IsolateOrigins,site-per-process",
           ],
