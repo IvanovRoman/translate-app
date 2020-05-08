@@ -81,7 +81,6 @@ async function generateUrl(url: string, langs: Languages): Promise<string> {
     }
   })
 }
-
 async function translateContent(
   url: string
 ): Promise<{ html: string | undefined; browser: puppeteer.Browser }> {
@@ -90,7 +89,7 @@ async function translateContent(
       try {
         const browser = await puppeteer.launch({
           // ignoreDefaultArgs: true,
-          headless: false,
+          // headless: false,
           args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",
@@ -114,23 +113,25 @@ async function translateContent(
           }
         })
         await page.goto("https://polki.pl/", { timeout: 0 })
-
         console.log(`Открываю страницу: ${url}`)
+
         await page.evaluate(() => {
           var pageLang = "pl"
           var userLang = "ru"
 
           var uid = "1E07F158C6FA4460B352973E9693B329"
-          var teId = "TE_" + uid
+          var teId: any = "TE_" + uid
           var cbId = "TECB_" + uid
 
           function show() {
             window.setTimeout(function () {
+              // @ts-ignore
               window[teId].showBanner(true)
             }, 10)
           }
 
           function newElem() {
+            // @ts-ignore
             var elem = new google.translate.TranslateElement({
               autoDisplay: false,
               floatPosition: 0,
@@ -144,11 +145,16 @@ async function translateContent(
             show()
           } else {
             if (
+              // @ts-ignore
               !window.google ||
+              // @ts-ignore
               !google.translate ||
+              // @ts-ignore
               !google.translate.TranslateElement
             ) {
+              // @ts-ignore
               if (!window[cbId]) {
+                // @ts-ignore
                 window[cbId] = function () {
                   window[teId] = newElem()
                   show()
@@ -164,7 +170,6 @@ async function translateContent(
             }
           }
         })
-
         console.log("Autoscrolling page...")
         await autoScroll(page)
         console.log("Finished autoscrolling")
