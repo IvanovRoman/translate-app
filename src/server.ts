@@ -93,7 +93,7 @@ async function translateContent(
       try {
         const browser = await puppeteer.launch({
           // ignoreDefaultArgs: true,
-          headless: false,
+          // headless: false,
           args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",
