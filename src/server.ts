@@ -177,10 +177,12 @@ async function translateContent(
         await autoScroll(page)
         console.log("Finished autoscrolling")
         const bodyTranslate: any = await page?.$("body")
-        const html: string | undefined = await page?.evaluate(
-          (body) => body.innerHTML,
-          bodyTranslate
-        )
+        // const html: string | undefined = await page?.evaluate(
+        //   (body) => body.innerHTML,
+        //   bodyTranslate
+        // )
+        const html: string | undefined = await page.content()
+
         // const bodyHandle: any = await page.$("body")
         // const translatePage = await page.evaluate(
         //   (body) => body.innerHTML,
