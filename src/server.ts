@@ -90,7 +90,7 @@ async function translateContent(
       try {
         const browser = await puppeteer.launch({
           // ignoreDefaultArgs: true,
-          // headless: false,
+          headless: false,
           args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",
@@ -113,29 +113,85 @@ async function translateContent(
             request.continue()
           }
         })
-        await page.goto(url, { timeout: 0 })
+        await page.goto("https://polki.pl/", { timeout: 0 })
 
         console.log(`Открываю страницу: ${url}`)
+        await page.evaluate(() => {
+          var pageLang = "pl"
+          var userLang = "ru"
 
-        const bodyHandle: any = await page.$("body")
-        const translatePage = await page.evaluate(
-          (body) => body.innerHTML,
-          bodyHandle
-        )
-        const frame = page.mainFrame()
-        const childFrame = frame
-          .childFrames()
-          .find((fr: puppeteer.Frame) => fr.name() === "c")
+          var uid = "1E07F158C6FA4460B352973E9693B329"
+          var teId = "TE_" + uid
+          var cbId = "TECB_" + uid
 
-        console.log("Url: ", childFrame?.url())
+          function show() {
+            window.setTimeout(function () {
+              window[teId].showBanner(true)
+            }, 10)
+          }
+
+          function newElem() {
+            var elem = new google.translate.TranslateElement({
+              autoDisplay: false,
+              floatPosition: 0,
+              multilanguagePage: true,
+              pageLanguage: pageLang,
+            })
+            return elem
+          }
+
+          if (window[teId]) {
+            show()
+          } else {
+            if (
+              !window.google ||
+              !google.translate ||
+              !google.translate.TranslateElement
+            ) {
+              if (!window[cbId]) {
+                window[cbId] = function () {
+                  window[teId] = newElem()
+                  show()
+                }
+              }
+              var s = document.createElement("script")
+              s.src =
+                "https://translate.google.com/translate_a/element.js?cb=" +
+                encodeURIComponent(cbId) +
+                "&client=tee&hl=" +
+                userLang
+              document.getElementsByTagName("head")[0].appendChild(s)
+            }
+          }
+        })
+
         console.log("Autoscrolling page...")
-        await autoScroll(childFrame)
+        await autoScroll(page)
         console.log("Finished autoscrolling")
-        const bodyTranslate: any = await childFrame?.$("body")
-        const html: string | undefined = await childFrame?.evaluate(
+        const bodyTranslate: any = await page?.$("body")
+        const html: string | undefined = await page?.evaluate(
           (body) => body.innerHTML,
           bodyTranslate
         )
+        // const bodyHandle: any = await page.$("body")
+        // const translatePage = await page.evaluate(
+        //   (body) => body.innerHTML,
+        //   bodyHandle
+        // )
+        // const frame = page.mainFrame()
+        // const childFrame = frame
+        //   .childFrames()
+        //   .find((fr: puppeteer.Frame) => fr.name() === "c")
+
+        // console.log("Url: ", childFrame?.url())
+        // console.log("Autoscrolling page...")
+        // await autoScroll(childFrame)
+        // console.log("Finished autoscrolling")
+        // const bodyTranslate: any = await childFrame?.$("body")
+        // const html: string | undefined = await childFrame?.evaluate(
+        //   (body) => body.innerHTML,
+        //   bodyTranslate
+        // )
         // const html: string | undefined = await childFrame?.content()
         resolve({ html, browser })
       } catch (err) {
