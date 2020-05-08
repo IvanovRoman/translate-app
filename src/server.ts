@@ -30,12 +30,15 @@ app.get("/page", async (req, res) => {
     const src: any = req.query.src
     const dest: any = req.query.dest
 
-    const url: string = await generateUrl(linkToPage, {
+    // const url: string = await generateUrl(linkToPage, {
+    //   source: src,
+    //   destination: dest,
+    // })
+
+    const { html, browser } = await translateContent(linkToPage, {
       source: src,
       destination: dest,
     })
-
-    const { html, browser } = await translateContent(url)
 
     res.set("Content-Type", "text/html")
     res.write(html)
@@ -82,14 +85,15 @@ async function generateUrl(url: string, langs: Languages): Promise<string> {
   })
 }
 async function translateContent(
-  url: string
+  url: string,
+  langs: Languages
 ): Promise<{ html: string | undefined; browser: puppeteer.Browser }> {
   return new Promise<{ html: string | undefined; browser: puppeteer.Browser }>(
     async (resolve, reject) => {
       try {
         const browser = await puppeteer.launch({
           // ignoreDefaultArgs: true,
-          // headless: false,
+          headless: false,
           args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",
@@ -103,21 +107,18 @@ async function translateContent(
 
         await page.setRequestInterception(true)
         page.on("request", (request) => {
-          if (
-            ["image", "stylesheet", "font"].indexOf(request.resourceType()) !==
-            -1
-          ) {
+          if (["image", "font"].indexOf(request.resourceType()) !== -1) {
             request.abort()
           } else {
             request.continue()
           }
         })
-        await page.goto("https://polki.pl/", { timeout: 0 })
+        await page.goto(url, { timeout: 0 })
         console.log(`Открываю страницу: ${url}`)
 
-        await page.evaluate(() => {
-          var pageLang = "pl"
-          var userLang = "ru"
+        await page.evaluate((langs) => {
+          var pageLang = langs.source
+          var userLang = langs.destination
 
           var uid = "1E07F158C6FA4460B352973E9693B329"
           var teId: any = "TE_" + uid
@@ -169,7 +170,9 @@ async function translateContent(
               document.getElementsByTagName("head")[0].appendChild(s)
             }
           }
-        })
+        }, langs)
+        await page.waitFor(5000)
+
         console.log("Autoscrolling page...")
         await autoScroll(page)
         console.log("Finished autoscrolling")
@@ -212,7 +215,7 @@ async function autoScroll(page: any) {
     await new Promise<string>(async (resolve, reject) => {
       try {
         var totalHeight = 0
-        var distance = 100
+        var distance = 30
         var timer = setInterval(() => {
           var scrollHeight = document.body.scrollHeight
           window.scrollBy(0, distance)
@@ -222,7 +225,7 @@ async function autoScroll(page: any) {
             clearInterval(timer)
             resolve()
           }
-        }, 300)
+        }, 450)
       } catch (err) {
         reject(err)
       }
