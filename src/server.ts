@@ -93,7 +93,7 @@ async function translateContent(
       try {
         const browser = await puppeteer.launch({
           // ignoreDefaultArgs: true,
-          // headless: false,
+          headless: false,
           args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",
@@ -217,7 +217,7 @@ async function autoScroll(page: any) {
     await new Promise<string>(async (resolve, reject) => {
       try {
         var totalHeight = 0
-        var distance = 100
+        var distance = 10
         var timer = setInterval(() => {
           var scrollHeight = document.body.scrollHeight
           window.scrollBy(0, distance)
@@ -227,7 +227,7 @@ async function autoScroll(page: any) {
             clearInterval(timer)
             resolve()
           }
-        }, 300)
+        }, 100)
       } catch (err) {
         reject(err)
       }
